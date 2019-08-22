@@ -2,6 +2,8 @@
 
 codebase_dir="com/dailystudio/codebase"
 codebase_pkg="com.dailystudio.codebase"
+codebase_name="Code Base"
+codebase_name_code="CodeBase"
 
 function print_usage {
   echo "Usage:"
@@ -28,7 +30,7 @@ function renamePackage() {
   fi
   anchor_dir=${PWD}
 
-  echo "renaming packages in ${base_dir} ..."
+  echo "     [*]: Renaming packages in [${base_dir}] ..."
 
   cd ${base_dir}
   dest_dir=""
@@ -41,9 +43,48 @@ function renamePackage() {
   done
   cd ${anchor_dir}
 
-  echo "moving contents from ${base_dir}/${codebase_dir} to ${base_dir}/${dest_dir}/ ..."
+#  echo "moving contents from ${base_dir}/${codebase_dir} to ${base_dir}/${dest_dir}/ ..."
   mv ${base_dir}/${codebase_dir}/* ${base_dir}/${dest_dir}/
   rm -rf ${base_dir}/${codebase_dir}/
+}
+
+function renameFiles() {
+  echo "     [*]: Renaming files [${codebase_name_code}*] to [${app_name_code}*] ..."
+
+  files=`find . -name "${codebase_name_code}*"`
+
+  for f in "${files[@]}"; do
+#    echo ${f}
+    nf=${f/${codebase_name_code}/${app_name_code}}
+#    echo "moving ${f} to ${nf}"
+    mv ${f} ${nf}
+  done
+}
+
+function squeezeAndCapitalizeString() {
+  orig_str=$*
+
+  new_str=""
+  for i in ${orig_str}; do 
+    tmp=`echo -n "${i:0:1}" | tr "[:lower:]" "[:upper:]"`; 
+    new_str=${new_str}"${tmp}${i:1}"; 
+  done  
+
+  echo "${new_str}"
+}
+
+function alignSourceCodes() {
+  src_pkg="${codebase_pkg//./\.}"
+  dst_pkg="${pkg_name//./\.}"
+  src_name="${codebase_name// /\ }"
+  dst_name="${app_name// /\ }"
+
+  echo "     [*]: Replacing [${codebase_pkg}] with [${pkg_name}] in source codes ..."
+  LC_ALL=C find . -type f -exec sed -i "" "s/${src_pkg}/${dst_pkg}/g" {} +
+  echo "     [*]: Replacing [${codebase_name_code}] with [${app_name_code}] in source codes ..."
+  LC_ALL=C find . -type f -exec sed -i "" "s/${codebase_name_code}/${app_name_code}/g" {} +
+  echo "     [*]: Replacing [${codebase_name}] with [${app_name}] in source codes ..."
+  LC_ALL=C find . -type f -exec sed -i "" "s/${src_name}/${dst_name}/g" {} +
 }
 
 
@@ -90,8 +131,10 @@ if [ ! -z "${outputs}" ]; then
   output_dir=${outputs}
 fi
 
+app_name_code=$(squeezeAndCapitalizeString ${app_name})
+
 echo "----- Code Generation for Android project -----"
-echo "Application name:    [${app_name}]"
+echo "Application name:    [${app_name}, code: ${app_name_code}]"
 echo "Package name:        [${pkg_name}]"
 echo "Output directory:    [${output_dir}]"
 
@@ -106,10 +149,14 @@ echo
 echo "[STEP 1]: Copying the codebase ..."
 cp -af ${source_dir}/* ${output_dir}/
 
-echo "[STEP 2]: Refactoring codes structures ..."
+echo "[STEP 2]: Refactoring package structure ..."
 cd ${output_dir}
 renamePackage "app/src/main/java"
 renamePackage "app/src/androidTest/java"
 renamePackage "app/src/test/java"
+renameFiles
+
+echo "[STEP 3]: Aligning source codes to new structure ..."
+alignSourceCodes
 
 cd ${OLD_PWD}
