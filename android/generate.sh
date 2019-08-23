@@ -129,11 +129,11 @@ fi
 
 OLD_PWD=${PWD}
 cd ${source_dir}
-find . -name ".idea" -exec rm -rf "{}" \;
-find . -name ".gradle" -exec rm -rf "{}" \;
-find . -name "*.iml" -exec rm -rf "{}" \;
-find . -name "build" -exec rm -rf "{}" \;
-find . -name "local.properties" -exec rm -rf "{}" \;
+find . -name ".idea" -exec rm -rf "{}" \; 2>/dev/null
+find . -name ".gradle" -exec rm -rf "{}" \; 2>/dev/null
+find . -name "*.iml" -exec rm -rf "{}" \; 2>/dev/null
+find . -name "build" -exec rm -rf "{}" \; 2>/dev/null
+find . -name "local.properties" -exec rm -rf "{}" \; 2>/dev/null
 cd ${OLD_PWD}
 
 output_dir="./generated"
