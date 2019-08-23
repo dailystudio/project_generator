@@ -3,7 +3,7 @@
     package="com.dailystudio.codebase">
 
     <application
-        android:name="com.dailystudio.app.DevBricksApplication"
+        android:name=".CodeBaseApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

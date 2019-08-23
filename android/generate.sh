@@ -74,17 +74,18 @@ function squeezeAndCapitalizeString() {
 }
 
 function alignSourceCodes() {
-  src_pkg="${codebase_pkg//./\.}"
-  dst_pkg="${pkg_name//./\.}"
-  src_name="${codebase_name// /\ }"
-  dst_name="${app_name// /\ }"
+  src=$1
+  src_code="${src//./\.}"
+  src_code="${src_code// /\ }"
+#  echo "${src} -> ${src_code}"
 
-  echo "     [*]: Replacing [${codebase_pkg}] with [${pkg_name}] in source codes ..."
-  LC_ALL=C find . -type f -exec sed -i "" "s/${src_pkg}/${dst_pkg}/g" {} +
-  echo "     [*]: Replacing [${codebase_name_code}] with [${app_name_code}] in source codes ..."
-  LC_ALL=C find . -type f -exec sed -i "" "s/${codebase_name_code}/${app_name_code}/g" {} +
-  echo "     [*]: Replacing [${codebase_name}] with [${app_name}] in source codes ..."
-  LC_ALL=C find . -type f -exec sed -i "" "s/${src_name}/${dst_name}/g" {} +
+  dst=$2
+  dst_code="${dst//./\.}"
+  dst_code="${dst_code// /\ }"
+#  echo "${dst} -> ${dst_code}"
+
+  echo "     [*]: Replacing [${src}] with [${dst}] in source codes ..."
+  LC_ALL=C find . -type f -exec sed -i "" "s/${src_code}/${dst_code}/g" {} +
 }
 
 
@@ -126,6 +127,15 @@ if [ ! -d "${source_dir}" ]; then
     exit 1
 fi
 
+OLD_PWD=${PWD}
+cd ${source_dir}
+find . -name ".idea" -exec rm -rf "{}" \;
+find . -name ".gradle" -exec rm -rf "{}" \;
+find . -name "*.iml" -exec rm -rf "{}" \;
+find . -name "build" -exec rm -rf "{}" \;
+find . -name "local.properties" -exec rm -rf "{}" \;
+cd ${OLD_PWD}
+
 output_dir="./generated"
 if [ ! -z "${outputs}" ]; then
   output_dir=${outputs}
@@ -133,20 +143,21 @@ fi
 
 app_name_code=$(squeezeAndCapitalizeString ${app_name})
 
-echo "----- Code Generation for Android project -----"
+echo
+echo "--------------- Code Generation for Android project ---------------"
 echo "Application name:    [${app_name}, code: ${app_name_code}]"
 echo "Package name:        [${pkg_name}]"
 echo "Output directory:    [${output_dir}]"
-
-if [ ! -d "${output_dir}" ]; then
-    echo "Output directory does NOT exist, creating it ..."
-    mkdir -p ${output_dir}
-fi
+echo "-------------------------------------------------------------------"
 
 OLD_PWD=${PWD}
 
 echo
 echo "[STEP 1]: Copying the codebase ..."
+if [ ! -d "${output_dir}" ]; then
+    echo "     [*]: Creating output directory ..."
+    mkdir -p ${output_dir}
+fi 
 cp -af ${source_dir}/* ${output_dir}/
 
 echo "[STEP 2]: Refactoring package structure ..."
@@ -156,7 +167,10 @@ renamePackage "app/src/androidTest/java"
 renamePackage "app/src/test/java"
 renameFiles
 
-echo "[STEP 3]: Aligning source codes to new structure ..."
-alignSourceCodes
+echo "[STEP 3]: Aligning source codes to the new structure ..."
+alignSourceCodes "${codebase_pkg}" "${pkg_name}"
+alignSourceCodes "${codebase_name_code}" "${app_name_code}"
+alignSourceCodes "${codebase_name}" "${app_name}"
+
 
 cd ${OLD_PWD}
