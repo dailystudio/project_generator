@@ -1,0 +1,15 @@
+[Unit]
+Description=Code Base Daemon Script
+
+[Service]
+WorkingDirectory=%server_path%
+ExecStart=/usr/bin/node %server_path%/mainserver.js --enable-https --key-path=%key_path% --cert-path=%cert_path%
+Restart=always
+User=codebase
+Group=codebase
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=codebase
+
+[Install]
+WantedBy=multi-user.target
