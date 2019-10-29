@@ -4,6 +4,8 @@
 #codebase_pkg="com.dailystudio.codebase"
 codebase_name="Code Base"
 codebase_name_code="codebase"
+codebase_default_port="1045"
+codebase_default_version="0.0.0"
 
 function print_usage {
   echo "Usage:"
@@ -13,6 +15,8 @@ function print_usage {
   echo ""
   echo "    -n APP_NAME:                     the application name"
   echo "    -e ENDPOINT_NAME:                the API endpoint name"
+  echo "    -p PORT_NUMBER:                  the port number of the service"
+  echo "    -v VERSION_NUMBER:               the start version number of the service"
   echo "    -o OUTPUT_DIRECTORY:             the target directory of generated project"
   echo "    -h:                              display this message"
   echo
@@ -64,7 +68,7 @@ function renameFiles() {
 }
 
 
-while getopts :n:e:o:hH opt; do
+while getopts :n:e:o:p:v:hH opt; do
   case ${opt} in
     n)
       app_name=${OPTARG}
@@ -74,6 +78,12 @@ while getopts :n:e:o:hH opt; do
       ;;
     o)
       outputs=${OPTARG}
+      ;;
+    p)
+      port=${OPTARG}
+      ;;
+    v)
+      version=${OPTARG}
       ;;
     h|H)
       print_usage
@@ -112,12 +122,24 @@ if [ ! -z "${outputs}" ]; then
   output_dir=${outputs}
 fi
 
+target_port=`date +%H%M`
+if [ ! -z "${port}" ]; then
+  target_port=${port}
+fi
+
+start_version=${codebase_default_version}
+if [ ! -z "${version}" ]; then
+  start_version=${version}
+fi
+
 app_name_code=$(squeezeAndLowerString ${app_name})
 
 echo
 echo "--------------- Code Generation for Android project ---------------"
 echo "Application name:    [${app_name}, code: ${app_name_code}]"
 echo "Endpoint name:       [${endpoint_name}]"
+echo "Port number:         [${target_port}]"
+echo "Start version        [${start_version}]"
 echo "Output directory:    [${output_dir}]"
 echo "-------------------------------------------------------------------"
 
@@ -138,6 +160,8 @@ renameFiles
 echo "[STEP 3]: Aligning source codes to the new structure ..."
 alignSourceCodes "${codebase_name_code}" "${app_name_code}"
 alignSourceCodes "${codebase_name}" "${app_name}"
+alignSourceCodes "${codebase_default_port}" "${target_port}"
+alignSourceCodes "${codebase_default_version}" "${start_version}"
 
 
 cd ${OLD_PWD}
