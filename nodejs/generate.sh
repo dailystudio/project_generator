@@ -113,6 +113,7 @@ fi
 
 OLD_PWD=${PWD}
 cd ${source_dir}
+find . -name ".idea" -exec rm -rf "{}" \; 2>/dev/null
 find . -name "node_modules" -exec rm -rf "{}" \; 2>/dev/null
 find . -name "package-lock.json" -exec rm -rf "{}" \; 2>/dev/null
 cd ${OLD_PWD}
@@ -123,6 +124,13 @@ if [ ! -z "${outputs}" ]; then
 fi
 
 target_port=`date +%H%M`
+portDigit0=`echo ${target_port::1}`
+portDigit1=`echo ${target_port:1:1}`
+portDigitRest=`echo ${target_port:1:4}`
+if [ "${portDigit0}" == "0" ]; then
+    target_port=${portDigit1}${portDigitRest}
+fi
+
 if [ ! -z "${port}" ]; then
   target_port=${port}
 fi
