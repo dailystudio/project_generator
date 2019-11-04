@@ -1,8 +1,1 @@
 include ':app'
-include ':devbricks'
-include ':annotations'
-include ':devbricks-processors'
-
-project(':devbricks').projectDir = new File("$rootDir/../../../../dailystudio/devbricks/")
-project(':annotations').projectDir = new File("$rootDir/../../../../dailystudio/devbricks-annotations/annotations/")
-project(':devbricks-processors').projectDir = new File("$rootDir/../../../../dailystudio/devbricks-annotations/processors/")

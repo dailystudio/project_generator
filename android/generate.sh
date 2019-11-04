@@ -158,7 +158,8 @@ if [ ! -d "${output_dir}" ]; then
     echo "     [*]: Creating output directory ..."
     mkdir -p ${output_dir}
 fi 
-cp -af ${source_dir}/* ${output_dir}/
+#cp -af ${source_dir}/* ${output_dir}/
+cp -af ${source_dir}/{.[!.],}* ${output_dir}/
 
 echo "[STEP 2]: Refactoring package structure ..."
 cd ${output_dir}
