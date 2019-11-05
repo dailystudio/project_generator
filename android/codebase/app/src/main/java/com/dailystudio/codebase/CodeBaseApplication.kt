@@ -1,6 +1,7 @@
 package com.dailystudio.codebase
 
 import com.dailystudio.app.DevBricksApplication
+import com.dailystudio.development.Logger
 import com.facebook.stetho.Stetho
 import com.nostra13.universalimageloader.core.ImageLoader
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration
@@ -17,6 +18,13 @@ class CodeBaseApplication : DevBricksApplication() {
         val config = ImageLoaderConfiguration.Builder(this).build()
 
         ImageLoader.getInstance().init(config)
+
+        Logger.info("application is running in %s mode.",
+            if (BuildConfig.DEBUG) "DEBUG" else "RELEASE")
+    }
+
+    override fun isDebugBuild(): Boolean {
+        return BuildConfig.DEBUG
     }
 
 }
