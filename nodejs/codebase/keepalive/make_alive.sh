@@ -3,29 +3,13 @@
 function print_usage {
   echo "Usage:"
   echo
-  echo "  $0 server_path cert_pass"
-  echo "    this will deploy a service in /etc/systemd with real server path."
+  echo "  $0 [-options] -m MODULE -s SEVER_PATH"
+  echo "    This script will deploy a application to run as a service after boot"
   echo ""
-  echo "    module_name:    the module name to be online"
-  echo "    server_path:    the absolute path of server deployment"
-  echo "    key_path:       the absolute path of server private-key"
-  echo "    cert_path:      the absolute path of server certification"
-  echo
-
-  exit
-}
-
-function print_usage {
-  echo "Usage:"
-  echo
-  echo "  $0 [-options] -m MODULE -s SEVER_PATH -k KEY_PATH -c CERT_PATH"
-  echo "    This script will deploy a Node.js application to run as a service after boot"
-  echo ""
-  echo "    -m MODULE:      the module name to be online"
-  echo "    -s SEVER_PATH:  the absolute path of server deployment"
-  echo "    -k KEY_PATH:    the absolute path of server private-key"
-  echo "    -c CERT_PATH:   the absolute path of server certification"
-  echo "    -t:             test outputs only"
+  echo "    -m MODULE:                       the module name to be online"
+  echo "    -s SEVER_PATH:                   the absolute path of server deployment"
+  echo "    -k KEY0:VAL0 [KEY1:VAL1 ...]:    the key:value pairs for script arguments"
+  echo "    -t:                              test outputs only"
   echo
 }
 
@@ -37,47 +21,65 @@ function exit_abnormal {
 test_outputs=false
 test_dir="./outputs"
 
-while getopts :m:s:k:c:thH opt; do
+while getopts :m:s:k:thH opt; do
   case ${opt} in
     m)
-		module=${OPTARG}
+	module=${OPTARG}
     	;;
     s)
-		srvdir=${OPTARG}
-	    ;;
+	srvdir=${OPTARG}
+	;;
     k)
-		keypath=${OPTARG}
+	kv_pairs=${OPTARG}
     	;;
-    c)
-		certpath=${OPTARG}
-		;;
-	t)
-	    test_outputs=true
-	    ;;
+    t)
+	test_outputs=true
+	;;
     h|H)
-		print_usage
-		exit 2
+	print_usage
+	exit 2
       	;;
-	:)
-		echo "[ERROR] $0: -${OPTARG} requires an argument."
+    :)
+	echo "[ERROR] $0: -${OPTARG} requires an argument."
       	exit_abnormal
       	;;
     *)
-		echo "[ERROR] $0: -${OPTARG} is unsuppported."
+	echo "[ERROR] $0: -${OPTARG} is unsuppported."
       	exit_abnormal
       	;;
   esac
 done
 
-if [ -z "${module}" ] || [ -z "${srvdir}" ] || [ -z "${keypath}" ] || [ -z "${certpath}" ]; then
+if [ -z "${module}" ] || [ -z "${srvdir}" ]; then
     echo "[ERROR] required options is missing."
     exit_abnormal
 fi
 
 echo "module: ${module}"
 echo "server path: ${srvdir}"
-echo "private-key path: ${keypath}"
-echo "certification path: ${certpath}"
+
+IFS=',' kv_array=(${kv_pairs})
+ncount=${#kv_array[@]}
+i=0
+
+sed_str="s/%server_path%/${srvdir//\//\\/}/g;"
+if (( ${ncount} > 0 )); then
+    echo "key-values: ${ncount}"
+    for kv in ${kv_array[@]}; do
+        key=$(echo ${kv%%:*} | xargs)
+        val=$(echo ${kv#*:} | xargs)
+        if [ ${i} == $((ncount - 1)) ]; then
+            echo "\`- [${i}] Key: [${key}], Value: [${val}]"
+        else
+            echo "|- [${i}] Key: [${key}], Value: [${val}]"
+        fi
+
+        sed_str="${sed_str}""s/%${key}%/${val//\//\\/}/g;"
+        i=$((i + 1))
+     done
+fi
+
+echo "sed str: ${sed_str}"
 
 root_dir="/"
 
@@ -98,10 +100,13 @@ logtmpl="$module.conf.templ"
 srvdest="$module.service"
 logdest="$module.conf"
 
+
 echo "generate final service: $srvtmpl -> $srvdest"
-sed "s/%server_path%/${srvdir//\//\\/}/g;s/%cert_path%/${certpath//\//\\/}/g;s/%key_path%/${keypath//\//\\/}/g" $srvtmpl > $srvdest
+#sed ${sed_str} ${srvtmpl} > ${srvdest}
+cat ${srvtmpl} | perl -pe ${sed_str} > ${srvdest}
 echo "generate rsyslog conf: $logtmpl -> $logdest"
-sed "s/%server_path%/${srvdir//\//\\/}/g" $logtmpl > $logdest
+#sed ${sed_str} ${logtmpl} > ${logdest}
+cat ${logtmpl} | perl -pe ${sed_str} > ${logdest}
 
 echo "copy server to systemd conf directory: $systemddir"
 if [ ! -d ${systemddir} ]; then

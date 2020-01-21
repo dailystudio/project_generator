@@ -11,14 +11,14 @@ const CERT_PATH = 'cert-path';
 const CERT_PASS_PHRASE = 'cert-pass-phrase';
 const SERVER_PORT = 'server-port';
 
-var argv = require('minimist')(process.argv.slice(2));
+let argv = require('minimist')(process.argv.slice(2));
 console.log('application arguments:');
 console.dir(argv);
 console.log();
 
 const app = express();
 
-var port = 1045;
+let port = 1045;
 if (argv[SERVER_PORT]) {
     port = argv[SERVER_PORT];
 }
@@ -29,7 +29,7 @@ app.use(cors);
 app.use(cookieParser);
 app.use(express.static(__dirname + '/public'));
 
-var codebaseApi = require('./api/codebaseapi.js')(app);
+let codebaseApi = require('./api/codebaseapi.js')(app);
 
 if (argv[ENABLE_HTTPS]) {
     if (argv[CERT_PASS_PHRASE] == undefined) {
@@ -46,7 +46,7 @@ if (argv[ENABLE_HTTPS]) {
         process.exit(1);
     }
 
-    var options = {
+    let options = {
         key: fs.readFileSync(argv[KEY_PATH]),
         cert: fs.readFileSync(argv[CERT_PATH]),
         passphrase: argv[CERT_PASS_PHRASE],
@@ -54,7 +54,7 @@ if (argv[ENABLE_HTTPS]) {
         rejectUnauthorized: false
     };
 
-    var server = https.createServer(options, app);
+    let server = https.createServer(options, app);
     server.listen(port, function(){
         console.log("Working on port %d, through HTTPS protocol", port);
     });
