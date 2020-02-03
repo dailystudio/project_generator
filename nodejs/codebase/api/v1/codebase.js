@@ -7,7 +7,7 @@ if (!fs.existsSync(UPLOAD_DIR)) {
     fs.mkdirSync(UPLOAD_DIR)
 }
 
-var uploadStorage = multer.diskStorage({
+let uploadStorage = multer.diskStorage({
 
     destination: function (req, file, callback) {
         callback(null, UPLOAD_DIR);
@@ -19,15 +19,15 @@ var uploadStorage = multer.diskStorage({
 
 });
 
-var uploadHelper = multer({storage: uploadStorage}).single('file');
+let uploadHelper = multer({storage: uploadStorage}).single('file');
 
 module.exports = {
 
     echo: function (req, res) {
         console.log(`echo message [${req.query.message}]`);
-        var message = req.query.message;
+        let message = req.query.message;
         if (!message) {
-            var error = {
+            let error = {
                 code: 400,
                 message: 'missing parameters: message'
             };
@@ -37,7 +37,7 @@ module.exports = {
             return;
         }
 
-        var response = {
+        let response = {
             code: 200,
             message: `${message}`
         };
@@ -49,7 +49,7 @@ module.exports = {
         uploadHelper(req, res, function (err) {
             console.log(`upload file: [${JSON.stringify(req.file)}]`);
             if (err) {
-                var error = {
+                let error = {
                     code: 400,
                     message: 'error uploading file.' + err
                 };
@@ -60,7 +60,7 @@ module.exports = {
             }
 
             if (!req.file || !req.file.path) {
-                var error = {
+                let error = {
                     code: 400,
                     message: 'no input at file'
                 };
@@ -70,7 +70,7 @@ module.exports = {
                 return;
             }
 
-            var response = {
+            let response = {
                 code: 200,
                 message: `file [${req.file.filename}] has been uploaded.`
             };
