@@ -1,5 +1,6 @@
 const fs        = require('fs');
 const multer    = require('multer');
+const logger    = require('devbricks-js').logger;
 
 const UPLOAD_DIR = './uploads';
 
@@ -24,7 +25,7 @@ let uploadHelper = multer({storage: uploadStorage}).single('file');
 module.exports = {
 
     echo: function (req, res) {
-        console.log(`echo message [${req.query.message}]`);
+        logger.info(`${__function}: echo message [${req.query.message}]`);
         let message = req.query.message;
         if (!message) {
             let error = {
@@ -47,7 +48,7 @@ module.exports = {
 
     echoUpload: function (req, res) {
         uploadHelper(req, res, function (err) {
-            console.log(`upload file: [${JSON.stringify(req.file)}]`);
+            logger.info(`${__function}: [${JSON.stringify(req.file)}]`);
             if (err) {
                 let error = {
                     code: 400,

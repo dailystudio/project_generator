@@ -4,6 +4,7 @@ const express       = require('express');
 const bodyParser    = require('body-parser');
 const cookieParser  = require('cookie-parser')();
 const cors          = require('cors')({origin: true});
+const logger        = require('devbricks-js').logger;
 
 const ENABLE_HTTPS = 'enable-https';
 const KEY_PATH = 'key-path';
@@ -12,9 +13,9 @@ const CERT_PASS_PHRASE = 'cert-pass-phrase';
 const SERVER_PORT = 'server-port';
 
 let argv = require('minimist')(process.argv.slice(2));
-console.log('application arguments:');
-console.dir(argv);
-console.log();
+
+logger.enableDebugOutputs(argv);
+logger.debug(`application arguments: ${JSON.stringify(argv, null, " ")}`);
 
 const app = express();
 
@@ -29,20 +30,20 @@ app.use(cors);
 app.use(cookieParser);
 app.use(express.static(__dirname + '/public'));
 
-let codebaseApi = require('./api/codebaseapi.js')(app);
+app.use(require('./api/codebaseapi.js'));
 
 if (argv[ENABLE_HTTPS]) {
     if (argv[CERT_PASS_PHRASE] == undefined) {
-        console.warn('no pass phrase input. use --cert-pass-phrase to set password of cert');
+        logger.warn('no pass phrase input. use --cert-pass-phrase to set password of cert');
     }
 
     if (argv[KEY_PATH] == undefined) {
-        console.error('use --key-path to set path of key');
+        logger.error('use --key-path to set path of key');
         process.exit(1);
     }
 
     if (argv[CERT_PATH] == undefined) {
-        console.error('use --cert-path to set path of cert');
+        logger.error('use --cert-path to set path of cert');
         process.exit(1);
     }
 
@@ -56,12 +57,12 @@ if (argv[ENABLE_HTTPS]) {
 
     let server = https.createServer(options, app);
     server.listen(port, function(){
-        console.log("Working on port %d, through HTTPS protocol", port);
+        logger.info(`Working on port ${port}, through HTTP protocol`);
     });
 
 } else {
     app.listen(port, function () {
-        console.log("Working on port %d, through HTTP protocol", port);
+        logger.info(`Working on port ${port}, through HTTPS protocol`);
     });
 }
 
