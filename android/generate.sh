@@ -64,8 +64,9 @@ function renameFiles() {
 function squeezeAndCapitalizeString() {
   orig_str=$*
 
+  filter_str=${orig_str//-/\ }
   new_str=""
-  for i in ${orig_str}; do 
+  for i in ${filter_str}; do 
     tmp=`echo -n "${i:0:1}" | tr "[:lower:]" "[:upper:]"`; 
     new_str=${new_str}"${tmp}${i:1}"; 
   done  
