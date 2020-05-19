@@ -4,7 +4,7 @@ const express       = require('express');
 const bodyParser    = require('body-parser');
 const cookieParser  = require('cookie-parser')();
 const cors          = require('cors')({origin: true});
-const logger        = require('devbricks-js').logger;
+const logger        = require('devbricksx-js').logger;
 
 const ENABLE_HTTPS = 'enable-https';
 const KEY_PATH = 'key-path';

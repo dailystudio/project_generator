@@ -1,6 +1,6 @@
 const fs        = require('fs');
 const multer    = require('multer');
-const logger    = require('devbricks-js').logger;
+const logger    = require('devbricksx-js').logger;
 
 const UPLOAD_DIR = './uploads';
 
