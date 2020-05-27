@@ -5,6 +5,8 @@ codebase_pkg="com.dailystudio.codebase"
 codebase_name="Code Base"
 codebase_name_code="CodeBase"
 
+tmp_dir="./tmp"
+
 function print_usage {
   echo "Usage:"
   echo
@@ -153,6 +155,9 @@ echo "-------------------------------------------------------------------"
 
 OLD_PWD=${PWD}
 
+rm -rf ${tmp_dir}
+mkdir ${tmp_dir}
+
 echo
 echo "[STEP 1]: Copying the codebase ..."
 if [ ! -d "${output_dir}" ]; then
@@ -160,10 +165,10 @@ if [ ! -d "${output_dir}" ]; then
     mkdir -p ${output_dir}
 fi 
 #cp -af ${source_dir}/* ${output_dir}/
-cp -af ${source_dir}/{.[!.],}* ${output_dir}/
+cp -af ${source_dir}/{.[!.],}* ${tmp_dir}/
 
 echo "[STEP 2]: Refactoring package structure ..."
-cd ${output_dir}
+cd ${tmp_dir}
 renamePackage "app/src/main/java"
 renamePackage "app/src/androidTest/java"
 renamePackage "app/src/test/java"
@@ -174,5 +179,8 @@ alignSourceCodes "${codebase_pkg}" "${pkg_name}"
 alignSourceCodes "${codebase_name_code}" "${app_name_code}"
 alignSourceCodes "${codebase_name}" "${app_name}"
 
-
 cd ${OLD_PWD}
+
+echo "[STEP 4]: Finalizing source codes into destination ..."
+cp -af ${tmp_dir}/{.[!.],}* ${output_dir}/
+rm -rf ${tmp_dir}

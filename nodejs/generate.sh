@@ -175,6 +175,6 @@ alignSourceCodes "${codebase_default_version}" "${start_version}"
 
 cd ${OLD_PWD}
 
-echo "[STEP 3]: Finalizing source codes into destination ..."
+echo "[STEP 4]: Finalizing source codes into destination ..."
 cp -af ${tmp_dir}/{.[!.],}* ${output_dir}/
 rm -rf ${tmp_dir}
