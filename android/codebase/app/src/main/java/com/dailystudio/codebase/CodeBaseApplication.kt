@@ -1,7 +1,7 @@
 package com.dailystudio.codebase
 
-import com.dailystudio.app.DevBricksApplication
-import com.dailystudio.development.Logger
+import com.dailystudio.devbricksx.app.DevBricksApplication
+import com.dailystudio.devbricksx.development.Logger
 import com.facebook.stetho.Stetho
 import com.nostra13.universalimageloader.core.ImageLoader
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration
