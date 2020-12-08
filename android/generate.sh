@@ -64,7 +64,7 @@ function renameFiles() {
 }
 
 function squeezeAndCapitalizeString() {
-  orig_str=$*
+  orig_str=`echo $* | tr -d "[:punct:]"`
 
   filter_str=${orig_str//-/\ }
   new_str=""
