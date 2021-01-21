@@ -3,7 +3,7 @@
 function print_usage {
   echo "Usage:"
   echo
-  echo "  $0 [-options] -m MODULE -s SEVER_PATH [-options]"
+  echo "  $0 [-options] -m MODULE -s SEVER_PATH"
   echo "    This script will deploy a application to run as a service after boot"
   echo ""
   echo "    -m MODULE:                       the module name to be online"
