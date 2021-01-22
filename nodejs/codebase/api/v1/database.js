@@ -1,7 +1,10 @@
 const fs                = require('fs');
 const { MongoClient }   = require("mongodb");
+const ObjectId          = require('mongodb').ObjectID;
 const logger            = require('devbricksx-js').logger;
 const fileutils         = require('devbricksx-js').fileutils;
+const requtils          = require('devbricksx-js').requtils;
+const resputils         = require('devbricksx-js').resputils;
 
 const DEFAULT_DATABASE = 'codebase';
 const DEFAULT_AUTH_FILE = './database/.db.auth';
@@ -13,12 +16,86 @@ module.exports = async function (dbOpts) {
 
     const client = await connectMongoDb(dbOpts)
 
-    modExports.list = async function (req, res) {
-        logger.info(`${__function}: list database [${req.query.collection}]`);
+    modExports.getCollection = async function (req, res) {
+        logger.info(`${__function}: get collection [${req.params.collection}]`);
 
-        logger.debug(`client = ${client}`)
+        if (!requtils.checkParametersOrResponseError(req, res, [
+            ['params', 'collection']
+        ])) {
+            return;
+        }
+
+        let collectionName = req.params.collection;
+
+        const database = client.db();
+        const collection = database.collection(collectionName);
+
+        const data = await collection.find().toArray();
+        logger.debug(`data: ${JSON.stringify(data)}`);
+
         let response = {
             code: 200,
+            data: data
+        };
+
+        res.end(JSON.stringify(response));
+    }
+
+    modExports.addObjects = async function (req, res) {
+        logger.info(`${__function}: add object to collection [${req.params.collection}]`);
+
+        if (!requtils.checkParametersOrResponseError(req, res, [
+            ['params', 'collection']
+        ])) {
+            return;
+        }
+
+        let collectionName = req.params.collection;
+
+        let objects = req.body;
+        logger.debug(`objects: ${JSON.stringify(objects)}`);
+
+        if (!(objects instanceof Array)) {
+            return resputils.responseError(res, 400,
+                `body should contain an array of objects.`)
+        }
+
+        const database = client.db();
+        const collection = database.collection(collectionName);
+
+        const result = await collection.insertMany(objects);
+        logger.debug(`${result.insertedCount} object(s) added.`)
+        let response = {
+            code: 200,
+            count: result.insertedCount
+        };
+
+        res.end(JSON.stringify(response));
+    }
+
+    modExports.deleteObject = async function (req, res) {
+        logger.info(`${__function}: delete object in collection [${req.params.collection}]`);
+
+        if (!requtils.checkParametersOrResponseError(req, res, [
+            ['params', 'collection'],
+            ['params', 'id']
+        ])) {
+            return;
+        }
+
+        const docId = req.params.id
+        const collectionName = req.params.collection;
+        logger.debug(`collection: ${collectionName}, docId: ${docId}`);
+
+        const database = client.db();
+        const collection = database.collection(collectionName);
+        const query = { _id : new ObjectId(docId) };
+
+        const result = await collection.deleteOne(query);
+        logger.debug(`${result.deletedCount} object(s) deleted.`)
+        let response = {
+            code: 200,
+            count: result.deletedCount
         };
 
         res.end(JSON.stringify(response));
@@ -29,7 +106,6 @@ module.exports = async function (dbOpts) {
 
 
 async function connectMongoDb(dbOpts) {
-
     logger.debug(`connect database: opts = ${JSON.stringify(dbOpts)}`);
 
     let database = DEFAULT_DATABASE;
