@@ -1,0 +1,8 @@
+module.exports = {
+  apps : [{
+    name: "%pm2_name%",
+    script: "app.js",
+    cwd: "%server_path%",
+    args: "%extra_arguments%"
+  }]
+};

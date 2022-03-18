@@ -55,16 +55,16 @@ if (argv[ENABLE_DB]) {
 }
 
 if (argv[ENABLE_HTTPS]) {
-    if (argv[CERT_PASS_PHRASE] == undefined) {
+    if (argv[CERT_PASS_PHRASE] === undefined) {
         logger.warn('no pass phrase input. use --cert-pass-phrase to set password of cert');
     }
 
-    if (argv[KEY_PATH] == undefined) {
+    if (argv[KEY_PATH] === undefined) {
         logger.error('use --key-path to set path of key');
         process.exit(1);
     }
 
-    if (argv[CERT_PATH] == undefined) {
+    if (argv[CERT_PATH] === undefined) {
         logger.error('use --cert-path to set path of cert');
         process.exit(1);
     }
@@ -79,12 +79,12 @@ if (argv[ENABLE_HTTPS]) {
 
     let server = https.createServer(options, app);
     server.listen(port, function(){
-        logger.info(`Working on port ${port}, through HTTP protocol`);
+        logger.info(`Working on port ${port}, through HTTPS protocol`);
     });
 
 } else {
     app.listen(port, function () {
-        logger.info(`Working on port ${port}, through HTTPS protocol`);
+        logger.info(`Working on port ${port}, through HTTP protocol`);
     });
 }
 

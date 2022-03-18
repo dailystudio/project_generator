@@ -5,7 +5,7 @@
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
-    "devbricksx-js": "^0.5.17",
+    "devbricksx-js": "^0.5.41",
     "express": "4.13.3",
     "find": "^0.2.9",
     "minimist": "^1.2.0",
