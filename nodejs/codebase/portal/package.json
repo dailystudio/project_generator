@@ -1,6 +1,6 @@
 {
-  "name": "portal",
-  "version": "0.1.0",
+  "name": "codebase-portal",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
