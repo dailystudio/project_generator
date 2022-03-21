@@ -4,6 +4,7 @@ const express       = require('express');
 const bodyParser    = require('body-parser');
 const cookieParser  = require('cookie-parser')();
 const cors          = require('cors')({origin: true});
+const history       = require('connect-history-api-fallback');
 const logger        = require('devbricksx-js').logger;
 
 const ENABLE_HTTPS = 'enable-https';
@@ -23,6 +24,23 @@ logger.enableDebugOutputs(argv);
 logger.debug(`application arguments: ${JSON.stringify(argv, null, " ")}`);
 
 const app = express();
+app.use(history({
+    index: '/index.html',
+    rewrites: [
+        {
+            from: /^\/v1\/.*$/,
+            to: function(context) {
+                return context.parsedUrl.path
+            }
+        },
+        {
+            from: /^\/v2\/.*$/,
+            to: function(context) {
+                return context.parsedUrl.path
+            }
+        }
+    ]
+}));
 
 let port = 1045;
 if (argv[SERVER_PORT]) {

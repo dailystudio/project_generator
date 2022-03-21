@@ -1,0 +1,24 @@
+:root {
+  --app-background-color: #1D1D1B;
+  --on-background-color: #fff;
+  --primary-color: #FF7900;
+  --highlight-color: var(--on-background-color);
+  --primary-text-color: #FF7900;
+  --secondary-text-color: #eee;
+  --accent-text-color: var(--on-background-color);
+  --error-color: #ef5350;
+}
+
+[theme="dark"] {
+  --app-background-color: #1D1D1B;
+  --highlight-color: #fff;
+  --on-background-color: #fff;
+  --secondary-text-color: #eee;
+}
+
+[theme="light"] {
+  --app-background-color: #fff;
+  --highlight-color: var(--on-background-color);
+  --on-background-color: #1D1D1B;
+  --secondary-text-color: #666;
+}

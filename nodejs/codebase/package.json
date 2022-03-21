@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "connect-history-api-fallback": "^1.6.0",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
     "devbricksx-js": "^0.5.41",
@@ -15,8 +16,8 @@
     "request-promise": "^4.2.2"
   },
   "devDependencies": {
-    "should": "~7.1.0",
     "mocha": "~2.3.3",
+    "should": "~7.1.0",
     "supertest": "~1.1.0"
   },
   "description": "Backend source codes for project Code Base",

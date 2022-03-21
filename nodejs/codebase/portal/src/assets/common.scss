@@ -1,0 +1,96 @@
+@import 'colors';
+
+body {
+    background: var(--app-background-color);
+}
+
+.v-application  {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    font-size: 22px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: var(--primary-text-color);
+    margin: 0 auto;
+    max-width: 480px;
+    height: 100%;
+}
+
+.default-text {
+    color: var(--primary-text-color);
+}
+
+.error-message {
+    color: var(--error-color);
+    font-size: 16px;
+    padding-top: 15px;
+}
+
+.oms-app {
+    background: var(--app-background-color) !important;
+    height: 100%;
+}
+
+.oms-app img {
+    width: 100%;
+    object-fit: cover;
+}
+
+.oms-app .v-text-field {
+    color: var(--accent-text-color) !important;
+}
+
+.oms-app .v-text-field__slot input {
+    color: var(--on-background-color) !important;
+}
+
+.oms-app .v-text-field--outlined fieldset {
+    border-color: var(--highlight-color) !important;
+}
+
+.oms-app .v-text-field__slot .v-label {
+    left: 0;
+}
+
+.oms-app .v-messages__wrapper {
+    color: var(--primary-text-color);
+    opacity: .5;
+}
+
+.oms-app .error--text .v-messages__wrapper {
+    color: var(--error-color) !important;
+}
+
+.oms-app .v-text-field > .v-input__control > .v-input__slot::before {
+    border-color: var(--highlight-color) !important;
+}
+
+.oms-app .v-label {
+    color: var(--on-background-color);
+}
+
+
+.oms-app .v-footer {
+    background: var(--app-background-color);
+    color: var(--secondary-text-color);
+    font-style: italic;
+    font-size: 12px;
+}
+
+.oms-app .v-footer .container {
+    padding: 8px;
+}
+
+.oms-app #copyright {
+    text-align: center;
+    font-size: 12px;
+    padding: 4px;
+}
+
+.fade-enter-active, .fade-leave-active {
+    transition: opacity .5s;
+}
+
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+}
