@@ -1,8 +1,6 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-
-    id("com.google.devtools.ksp") version "$ksp_version"
 }
 
 android {
@@ -80,14 +78,6 @@ android {
         jvmTarget = "1.8"
         freeCompilerArgs = ['-Xjvm-default=enable']
     }
-
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas".toString())
-    }
-
-    sourceSets.configureEach {
-        kotlin.srcDir("$buildDir/generated/ksp/$name/kotlin/")
-    }
 }
 
 dependencies {
@@ -98,7 +88,4 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     api project(":core")
-
-    ksp "cn.dailystudio:devbricksx-compiler:${DEVBRICKS_X_VERSION}"
-    ksp "androidx.room:room-compiler:${ROOM_VERSION}"
 }
