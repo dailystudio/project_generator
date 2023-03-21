@@ -172,6 +172,10 @@ cd ${tmp_dir}
 renamePackage "app/src/main/java"
 renamePackage "app/src/androidTest/java"
 renamePackage "app/src/test/java"
+renamePackage "core/src/main/java"
+renamePackage "core/src/androidTest/java"
+renamePackage "core/src/test/java"
+
 renameFiles
 
 echo "[STEP 3]: Aligning source codes to the new structure ..."
