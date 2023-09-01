@@ -11,6 +11,8 @@ android {
     buildToolsVersion BUILD_TOOLS
 
     defaultConfig {
+        namespace 'com.dailystudio.codebase.core'
+
         minSdkVersion 23
         targetSdkVersion TARGET_SDK_VERSION
         versionCode VERSION_CODE
@@ -26,28 +28,35 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
+            resValue "string", "app_name", "@string/app_name_release"
+
             buildConfigField "boolean","USE_STETHO","false"
         }
 
         debug {
+            resValue "string", "app_name", "@string/app_name_debug"
+
             buildConfigField "boolean","USE_STETHO","true"
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs = ['-Xjvm-default=enable']
+        jvmTarget = "17"
     }
 }
 
 /* DevBricksX */
 devKit {
-    devKitComps = [ "Network"]
+    devKitComps = [ "Network" ]
 }
 
 dependencies {

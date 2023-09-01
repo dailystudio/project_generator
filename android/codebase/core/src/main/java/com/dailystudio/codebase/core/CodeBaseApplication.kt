@@ -1,4 +1,4 @@
-package com.dailystudio.codebase
+package com.dailystudio.codebase.core
 
 import com.dailystudio.devbricksx.app.DevBricksApplication
 import com.dailystudio.devbricksx.development.Logger
