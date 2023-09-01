@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+
+    id("cn.dailystudio.devbricksx.devkit") version "$devkit_version"
 }
 
 android {
@@ -71,6 +73,10 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+}
+
+devKit {
+    devKitComps = [ "Compose" ]
 }
 
 dependencies {
