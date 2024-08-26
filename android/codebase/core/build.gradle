@@ -7,14 +7,14 @@ plugins {
 }
 
 android {
-    compileSdkVersion COMPILE_SDK
-    buildToolsVersion BUILD_TOOLS
-
     defaultConfig {
         namespace 'com.dailystudio.codebase.core'
 
-        minSdkVersion 23
+        compileSdk COMPILE_SDK
+
+        minSdkVersion MINI_SDK_VERSION
         targetSdkVersion TARGET_SDK_VERSION
+
         versionCode VERSION_CODE
         versionName VERSION_NAME
 
