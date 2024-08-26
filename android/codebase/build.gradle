@@ -1,9 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.9.0'
-    ext.nav_version = "2.7.0"
-    ext.devkit_version = '1.8.2-1.0.7'
+    ext.kotlin_version = '2.0.21'
+    ext.nav_version = "2.7.5"
+    ext.devkit_version = '2.0.0-1.2.0'
 
     repositories {
         google()
@@ -11,7 +11,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.0.0'
+        classpath 'com.android.tools.build:gradle:8.7.3'
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
@@ -31,10 +31,11 @@ allprojects {
 
 ext {
     // Compile Settings
-    COMPILE_SDK = 34 // temporarily for avoiding xml completion issue
-    BUILD_TOOLS = '34.0.0'
+    COMPILE_SDK = 35 // temporarily for avoiding xml completion issue
+    BUILD_TOOLS = '35.0.0'
 
-    TARGET_SDK_VERSION = 34
+    MINI_SDK_VERSION = 21
+    TARGET_SDK_VERSION = 35
 
     VERSION_NAME = version()
     VERSION_CODE = versionCode().toInteger()

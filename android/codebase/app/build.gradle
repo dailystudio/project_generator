@@ -1,18 +1,20 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+
+    id("cn.dailystudio.devbricksx.devkit") version "$devkit_version"
 }
 
 android {
-    compileSdkVersion COMPILE_SDK
-    buildToolsVersion BUILD_TOOLS
-
     defaultConfig {
         applicationId "com.dailystudio.codebase"
         namespace "com.dailystudio.codebase"
 
-        minSdkVersion 23
+
+        compileSdk COMPILE_SDK
+        minSdkVersion MINI_SDK_VERSION
         targetSdkVersion TARGET_SDK_VERSION
+
         versionCode VERSION_CODE
         versionName VERSION_NAME
 
@@ -76,11 +78,11 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
 
     implementation project(":core")
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
