@@ -31,11 +31,10 @@ allprojects {
 
 ext {
     // Compile Settings
-    COMPILE_SDK = 35 // temporarily for avoiding xml completion issue
-    BUILD_TOOLS = '35.0.0'
+    COMPILE_SDK = 34 // temporarily for avoiding xml completion issue
+    BUILD_TOOLS = '34.0.0'
 
-    MINI_SDK_VERSION = 21
-    TARGET_SDK_VERSION = 35
+    TARGET_SDK_VERSION = 34
 
     VERSION_NAME = version()
     VERSION_CODE = versionCode().toInteger()
