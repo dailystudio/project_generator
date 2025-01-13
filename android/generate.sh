@@ -15,7 +15,8 @@ function print_usage {
   echo ""
   echo "    -n APP_NAME:                     the application name"
   echo "    -p PACKAGE_NAME:                 the package name"
-  echo "    -o OUTPUT_DIRECTORY:             the target directory of generated project"
+  echo "    -o OUTPUT_DIRECTORY:             the output directory of generated project"
+  echo "    -t TARGET:                       the target: all, views [Android Views + XML], compose [Jetpack Compose]. Default is \"all\""
   echo "    -h:                              display this message"
   echo
 }
@@ -48,6 +49,31 @@ function renamePackage() {
 #  echo "moving contents from ${base_dir}/${codebase_dir} to ${base_dir}/${dest_dir}/ ..."
   mv ${base_dir}/${codebase_dir}/* ${base_dir}/${dest_dir}/
   rm -rf ${base_dir}/${codebase_dir}/
+}
+
+function removeModule() {
+  local module_name="$1"  # 传入的模块名称
+  local settings_file="settings.gradle"  # 指定文件名
+
+  if [ ! -f "${settings_file}" ]; then
+    echo "[ERROR]: ${settings_file} does not exist."
+    return 1
+  fi
+
+  echo "[INFO]: Removing module: ${module_name} from ${settings_file} ..."
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "/include ':${module_name}'/d" "${settings_file}"
+  else
+    sed -i "/include ':${module_name}'/d" "${settings_file}"
+  fi
+
+  if [ $? -eq 0 ]; then
+    echo "[INFO]: Successfully removed module: ${module_name}."
+    return 0
+  else
+    echo "[ERROR]: Failed to remove module: ${module_name}."
+    return 1
+  fi
 }
 
 function renameFiles() {
@@ -91,8 +117,21 @@ function alignSourceCodes() {
   LC_ALL=C find . -type f -exec sed -i "" "s/${src_code}/${dst_code}/g" {} +
 }
 
+function format_array {
+  local input_array=("$@")
+  local formatted=""
+  for element in "${input_array[@]}"; do
+    local temp=$(echo "${element:0:1}" | tr '[:lower:]' '[:upper:]')${element:1}
+    formatted+="${temp}, "
+  done
 
-while getopts :n:p:o:hH opt; do
+  echo "${formatted%??}"
+}
+
+target="all"
+modules=("views" "compose")
+
+while getopts :n:p:o:t:hH opt; do
   case ${opt} in
     n)
       app_name=${OPTARG}
@@ -102,6 +141,9 @@ while getopts :n:p:o:hH opt; do
       ;;
     o)
       outputs=${OPTARG}
+      ;;
+    t)
+      target=$(echo "${OPTARG}" | tr '[:upper:]' '[:lower:]')
       ;;
     h|H)
       print_usage
@@ -123,6 +165,23 @@ if [ -z "${app_name}" ] || [ -z "${pkg_name}" ]; then
     echo "[ERROR] required options is missing."
     exit_abnormal
 fi
+
+if [[ "${target}" != "all" && "${target}" != "views" && "${target}" != "compose" ]]; then
+    echo "[ERROR] Invalid target: [${target}]. Valid values are: [all, views, compose]."
+    exit_abnormal
+fi
+
+case "${target}" in
+  "views")
+    modules=("views")
+    ;;
+  "compose")
+    modules=("compose")
+    ;;
+  "all")
+    modules=("views" "compose")
+    ;;
+esac
 
 source_dir="${PWD}/codebase"
 if [ ! -d "${source_dir}" ]; then
@@ -151,6 +210,7 @@ echo "--------------- Code Generation for Android project ---------------"
 echo "Application name:    [${app_name}, code: ${app_name_code}]"
 echo "Package name:        [${pkg_name}]"
 echo "Output directory:    [${output_dir}]"
+echo "Targets:             [$(format_array ${modules[@]})]"
 echo "-------------------------------------------------------------------"
 
 OLD_PWD=${PWD}
@@ -166,12 +226,31 @@ if [ ! -d "${output_dir}" ]; then
 fi 
 #cp -af ${source_dir}/* ${output_dir}/
 cp -af ${source_dir}/{.[!.],}* ${tmp_dir}/
+if [[ ! " ${modules[@]} " =~ " views " ]]; then
+    rm -rf ${tmp_dir}/app
+fi
+if [[ ! " ${modules[@]} " =~ " compose " ]]; then
+    rm -rf ${tmp_dir}/app-compose
+fi
 
 echo "[STEP 2]: Refactoring package structure ..."
 cd ${tmp_dir}
-renamePackage "app/src/main/java"
-renamePackage "app/src/androidTest/java"
-renamePackage "app/src/test/java"
+if [[ " ${modules[@]} " =~ " views " ]]; then
+  renamePackage "app/src/main/java"
+  renamePackage "app/src/androidTest/java"
+  renamePackage "app/src/test/java"
+else
+  removeModule "app"
+fi
+
+if [[ " ${modules[@]} " =~ " compose " ]]; then
+  renamePackage "app-compose/src/main/java"
+  renamePackage "app-compose/src/androidTest/java"
+  renamePackage "app-compose/src/test/java"
+else
+  removeModule "app-compose"
+fi
+
 renamePackage "core/src/main/java"
 renamePackage "core/src/androidTest/java"
 renamePackage "core/src/test/java"
