@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'androidx.navigation.safeargs.kotlin'
 
     id("cn.dailystudio.devbricksx.devkit") version "$devkit_version"
 }
@@ -70,7 +69,8 @@ dependencies {
     /* Image & Animation */
     api("io.coil-kt:coil:${project.ext.coilVersion}")
 
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$android_junit_ext_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$android_junit_espresso_version"
+
 }
