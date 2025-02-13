@@ -1,0 +1,2 @@
+devbricksx>=0.1.2
+ET
