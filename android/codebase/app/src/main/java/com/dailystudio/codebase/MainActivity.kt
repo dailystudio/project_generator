@@ -3,7 +3,6 @@ package com.dailystudio.codebase
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.appcompat.widget.Toolbar
-import com.dailystudio.devbricksx.development.Logger
 
 class MainActivity : AppCompatActivity() {
 
@@ -17,7 +16,6 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         val topBar: Toolbar? = findViewById(R.id.topAppBar)
-        Logger.debug("topBar: $topBar")
 
         topBar?.let {
             setSupportActionBar(it)
