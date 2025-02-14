@@ -159,7 +159,7 @@ def element_to_android_path(element, viewport_height):
                         f"Warning: Insufficient values for command '{command}'. Skipping remaining part of this command.")
                     break
             android_path_segments.append(android_command + ",".join([format_float(v) for v in android_values]))
-        ret_val = ("".join(android_path_segments), fill_color)
+        ret_val = ("".join(android_path_segments), fill_color, None)
         return ret_val
 
     elif tag == 'rect':
@@ -180,18 +180,18 @@ def element_to_android_path(element, viewport_height):
             ])
         else:  # Rounded rectangle (basic approximation, might need more sophisticated arc handling for perfect round corners)
             android_path_segments.extend([
-                f"M{format_float(x + rx)},{format_float(viewport_height - y)}",
+                f"M{format_float(x + rx)},{format_float(viewport_height + y)}",
                 f"H{format_float(x + width - rx)}",
                 f"q{format_float(rx)},0 {format_float(rx)},{format_float(ry)}",  # Approximate top-right corner
-                f"V{format_float(viewport_height - (y + height - ry))}",
+                f"V{format_float(viewport_height + (y + height - ry))}",
                 f"q0,{format_float(ry)} {format_float(-rx)},{format_float(ry)}",  # Approximate bottom-right corner
                 f"H{format_float(x + rx)}",
                 f"q{format_float(-rx)},0 {format_float(-rx)},{format_float(-ry)}",  # Approximate bottom-left corner
-                f"V{format_float(viewport_height - (y + ry))}",
+                f"V{format_float(viewport_height + (y + ry))}",
                 f"q0,{format_float(-ry)} {format_float(rx)},{format_float(-ry)}",  # Approximate top-left corner
                 "Z"
             ])
-        ret_val = ("".join(android_path_segments), fill_color)
+        ret_val = ("".join(android_path_segments), fill_color, None)
         return ret_val
 
     elif tag == 'line':
@@ -200,13 +200,13 @@ def element_to_android_path(element, viewport_height):
         x2 = float(element.attrib.get('x2', 0))
         y2 = float(element.attrib.get('y2', 0))
         android_path_segments.extend([
-            f"M{format_float(x1)},{format_float(viewport_height - y1)}",
-            f"L{format_float(x2)},{format_float(viewport_height - y2)}"
+            f"M{format_float(x1)},{format_float(viewport_height + y1)}",
+            f"L{format_float(x2)},{format_float(viewport_height + y2)}"
         ])
-        ret_val = ("".join(android_path_segments), fill_color)
+        ret_val = ("".join(android_path_segments), fill_color, "#fff")
         return ret_val
 
-    ret_val = (None, None)
+    ret_val = (None, None, None)
     return ret_val
 
 def convert_svg_to_vector(input_file, output_file):
@@ -222,13 +222,13 @@ def convert_svg_to_vector(input_file, output_file):
         tree = ET.parse(input_file)
         root = tree.getroot()
     except FileNotFoundError:
-        print(f"Error: Input file '{input_file}' not found.")
+        error(f"Error: Input file '{input_file}' not found.")
         return False
     except ET.ParseError as e:
-        print(f"Error parsing input file '{input_file}': {e}")
+        error(f"Error parsing input file '{input_file}': {e}")
         return False
     except Exception as e:
-        print(f"Error reading input file '{input_file}': {e}")
+        error(f"Error reading input file '{input_file}': {e}")
         return False
 
 
@@ -240,9 +240,9 @@ def convert_svg_to_vector(input_file, output_file):
             viewport_width = viewbox_values[2]
             viewport_height = viewbox_values[3]
         else:
-            print("Warning: viewBox attribute does not contain 4 values. Using default viewport 30x30.")
+            warn("Warning: viewBox attribute does not contain 4 values. Using default viewport 30x30.")
     else:
-        print("Warning: viewBox attribute not found in SVG. Using default viewport 30x30.")
+        warn("Warning: viewBox attribute not found in SVG. Using default viewport 30x30.")
 
     svg_fill_color = root.attrib.get('fill')
     info(f'svg_fill_color: {svg_fill_color}')
@@ -251,13 +251,14 @@ def convert_svg_to_vector(input_file, output_file):
 
     android_path_data_segments = []
     fill_colors = {} # Dictionary to store fill colors, keyed by path segment index
+    stroke_colors = {} # Dictionary to store fill colors, keyed by path segment index
 
     # Directly find path, rect, and line elements in the SVG namespace
     for element_tag in ['path', 'rect', 'line']:
         for index, element in enumerate(root.findall(f'.//{svg_namespace}{element_tag}')): # Use enumerate to track index
             return_value = element_to_android_path(element, viewport_height) # Get path data and fill color
-            print(f"DEBUG: Return from element_to_android_path:", return_value) # Debug print
-            android_path, fill_color = return_value # Unpack here
+            info(f"DEBUG: Return from element_to_android_path:", return_value) # Debug print
+            android_path, fill_color, stroke_color = return_value # Unpack here
             if android_path:
                 android_path_data_segments.append(android_path)
                 if fill_color:
@@ -265,9 +266,10 @@ def convert_svg_to_vector(input_file, output_file):
                 else:
                     fill_colors[index] = svg_fill_color
 
+                stroke_colors[index] = stroke_color
+
 
     android_path_data = "".join(android_path_data_segments)
-
 
     vector_drawable_xml_lines = [f"<vector xmlns:android=\"http://schemas.android.com/apk/res/android\"",
                            f"    android:width=\"24dp\"",
@@ -278,11 +280,16 @@ def convert_svg_to_vector(input_file, output_file):
     path_data_segments = android_path_data_segments # Rename for clarity in loop
     for index, path_data in enumerate(path_data_segments):
         fill_color_attr = "" # Default no fill color attribute
+        stroke_color_attr =""
         if index in fill_colors:
             fill_color_attr = f"      android:fillColor=\"{fill_colors[index]}\"" # Apply extracted fill color
+        if index in stroke_colors:
+            stroke_color_attr = f"      android:strokeColor=\"{stroke_colors[index]}\" android:strokeWidth=\"1\"" # Apply extracted fill color
+
         vector_drawable_xml_lines.append(f"  <path\n"
                                    f"      android:pathData=\"{path_data}\"\n"
                                    + fill_color_attr + # Add fill color attribute here
+                                    stroke_color_attr +
                                    f"      />") # Close path tag
 
     vector_drawable_xml_lines.append(f"</vector>") # Close vector tag
@@ -294,7 +301,7 @@ def convert_svg_to_vector(input_file, output_file):
             f_out.write(vector_drawable_xml)
         return True
     except Exception as e:
-        print(f"Error writing to output file '{output_file}': {e}")
+        error(f"Error writing to output file '{output_file}': {e}")
         return False
 
 if __name__ == '__main__':
