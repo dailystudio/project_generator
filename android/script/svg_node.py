@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import io
 import logging
 import math
 import re
@@ -22,8 +23,8 @@ from typing import Dict, List, Optional, Tuple, Callable
 from xml.dom import minidom
 from xml.dom.minidom import Element, Node, NamedNodeMap
 
-from com.android.ide.common.vectordrawable import Svg2Vector, SvgColor
-from com.android.ide.common.vectordrawable.svg_tree import SvgTree  # Assuming SvgTree is in svg_tree.py
+from svg_to_vector import Svg2Vector, SvgColor
+from svg_tree import SvgTree  # Assuming SvgTree is in svg_tree.py
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +156,7 @@ class SvgNode(ABC):
         )  # Identity matrix
 
         if type.lower() == MATRIX_ATTRIBUTE:
-            if numLength != 6:
+            if num_length != 6:
                 return None
             parsed_transform = (
                 numbers[0],

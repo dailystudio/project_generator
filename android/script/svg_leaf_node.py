@@ -17,20 +17,20 @@
 import logging
 from typing import Optional, Dict, List, Tuple, Any
 import io
+from xml.dom.minidom import Element
 
-from com.android.ide.common.vectordrawable import Svg2Vector
+from svg_to_vector import Svg2Vector
+
+from svg_tree import SvgTree
+from svg_node import *
+
 from com.android.ide.common.vectordrawable.path_parser import PathParser, ParseMode
-from com.android.ide.common.vectordrawable.svg_node import SvgNode
 from com.android.ide.common.vectordrawable.vd_path import VdPath
 from com.android.ide.common.vectordrawable.vd_util import format_float_value, \
     get_coordinate_format  # Assuming vd_util.py
 from com.android.ide.common.vectordrawable.svg_gradient_node import \
     SvgGradientNode  # Assuming SvgGradientNode is in a separate module
 
-from xml.dom.minidom import Element
-
-from svg_tree import SvgTree
-from svg_node import SvgNode
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +44,12 @@ class SvgLeafNode(SvgNode):
         self.fill_gradient_node: Optional[SvgGradientNode] = None
         self.stroke_gradient_node: Optional[SvgGradientNode] = None
 
-    def deep_copy(self) -> SvgLeafNode:
+    def deep_copy(self) -> 'SvgLeafNode':
         new_node = SvgLeafNode(self.get_tree(), self.document_element, self.get_name())
         new_node.copy_from(self)
         return new_node
 
-    def copy_from(self, from_node: SvgLeafNode):
+    def copy_from(self, from_node: 'SvgLeafNode'):
         super().copy_from(from_node)
         self.path_data = from_node.path_data
         self.fill_gradient_node = from_node.fill_gradient_node

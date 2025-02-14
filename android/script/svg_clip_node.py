@@ -19,9 +19,12 @@ import io
 from xml.dom.minidom import Element
 from enum import Enum
 
+from svg_to_vector import Svg2Vector
+from svg_tree import SvgTree
+from svg_node import *
+
 from com.android.ide.common.vectordrawable.svg_node import SvgNode, SvgGroupNode, Visitor, VisitResult, \
     SvgLeafNode  # Assuming svg_node is in svg_node.py
-from com.android.ide.common.vectordrawable import Svg2Vector
 from com.android.ide.common.vectordrawable.vd_util import parse_color_value
 
 logger = logging.getLogger(__name__)
@@ -38,16 +41,16 @@ class SvgClipPathNode(SvgGroupNode):
     nodes that are clipped by the path.
     """
 
-    def __init__(self, svg_tree: "SvgTree", element: Element, name: Optional[str] = None):
+    def __init__(self, svg_tree: SvgTree, element: Element, name: Optional[str] = None):
         super().__init__(svg_tree, element, name)
         self.affected_nodes: List[SvgNode] = []
 
-    def deep_copy(self) -> "SvgClipPathNode":
+    def deep_copy(self) -> 'SvgClipPathNode':
         new_instance = SvgClipPathNode(self.get_tree(), self.document_element, self.name)
         new_instance.copy_from(self)
         return new_instance
 
-    def copy_from(self, from_node: "SvgClipPathNode"):
+    def copy_from(self, from_node: 'SvgClipPathNode'):
         super().copy_from(from_node)
         for node in from_node.affected_nodes:
             self.add_affected_node(node)

@@ -13,15 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import logging
-from typing import List, Optional, Tuple, Dict
-import io
-from xml.dom.minidom import Element
-
-from com.android.ide.common.vectordrawable.svg_node import SvgNode, Visitor, \
+from svg_node import *
+from com.android.ide.common.vectordrawable.svg_node import Visitor, \
     VisitResult  # Assuming SvgNode is in svg_node.py
-
-from svg_node import SvgNode
 
 logger = logging.getLogger(__name__)
 

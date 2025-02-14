@@ -17,15 +17,12 @@
 import logging
 import os
 from typing import List, Dict, Set, Tuple, Optional, Any
-from xml.dom import minidom
 from xml.dom.minidom import Node, Document, NamedNodeMap
-from com.android.ide.common.vectordrawable.svg_node import SvgNode, SvgGroupNode  # Assuming svg_node.py
-from com.android.ide.common.vectordrawable.vd_util import VdUtil, get_coordinate_format
-import io
-from enum import Enum
 from collections import OrderedDict
 from dataclasses import dataclass
-import math
+
+from svg_node import *
+from svg_group_node import SvgGroupNode
 
 logger = logging.getLogger(__name__)
 
@@ -358,16 +355,16 @@ class SvgTree:
         writer.write(HEAD)
         writer.write('\n')
         if self.get_has_gradient():
-            writer.write(SvgNode.CONTINUATION_INDENT)
+            writer.write(CONTINUATION_INDENT)
             writer.write(AAPT_BOUND)
             writer.write('\n')
 
         viewport_width = self.get_view_port_width()
         viewport_height = self.get_view_port_height()
 
-        writer.write(SvgNode.CONTINUATION_INDENT)
+        writer.write(CONTINUATION_INDENT)
         writer.write("android:width=\"")
         writer.write(VdUtil.format_float_value(self.get_width() * self.get_scale_factor()))
         writer.write("dp\"")
         writer.write('\n')
-        writer.write(SvgNode.CONTINUATION_INDENT)
+        writer.write(CONTINUATION_INDENT)
