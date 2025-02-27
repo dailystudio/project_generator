@@ -2,6 +2,7 @@
 
 codebase_dir="com/dailystudio/codebase"
 codebase_pkg="com.dailystudio.codebase"
+codebase_jni_pkg="com_dailystudio_codebase"
 codebase_name="Code Base"
 codebase_name_code="CodeBase"
 
@@ -16,7 +17,8 @@ function print_usage {
   echo "    -n APP_NAME:                     the application name"
   echo "    -p PACKAGE_NAME:                 the package name"
   echo "    -o OUTPUT_DIRECTORY:             the output directory of generated project"
-  echo "    -t TARGET:                       the target: all, views [Android Views + XML], compose [Jetpack Compose]. Default is \"all\""
+  echo "    -u UI_TARGETS:                   the UI targets: all, views [Android Views + XML], compose [Jetpack Compose]. Default is \"all\""
+  echo "    -e EXTRA_MODULES:                include extra modules. Available module: ndk."
   echo "    -h:                              display this message"
   echo
 }
@@ -52,7 +54,7 @@ function renamePackage() {
 }
 
 function removeModule() {
-  local module_name="$1"  # 传入的模块名称
+  local module_name="$1" 
   local settings_file="settings.gradle"  # 指定文件名
 
   if [ ! -f "${settings_file}" ]; then
@@ -67,13 +69,32 @@ function removeModule() {
     sed -i "/include ':${module_name}'/d" "${settings_file}"
   fi
 
-  if [ $? -eq 0 ]; then
-    echo "[INFO]: Successfully removed module: ${module_name}."
-    return 0
-  else
+  if [ $? -ne 0 ]; then
     echo "[ERROR]: Failed to remove module: ${module_name}."
     return 1
   fi
+
+  # Find all build.gradle files in the current directory and subdirectories
+  find . -name "build.gradle" | while read gradle_file; do
+    if [ -f "$gradle_file" ]; then
+      echo "[INFO]: Removing implementation project(\":${module_name}\") from ${gradle_file} ..."
+      
+      # Remove the 'implementation project(":core-native")' line from the build.gradle file
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        # For macOS (Darwin)
+        sed -i '' "/implementation project(\":${module_name}\")/d" "${gradle_file}"
+      else
+        # For Linux
+        sed -i "/implementation project(\":${module_name}\")/d" "${gradle_file}"
+      fi
+
+      if [ $? -ne 0 ]; then
+        echo "[ERROR]: Failed to remove \":${module_name}\" dependency from ${gradle_file}."
+      fi
+    fi
+  done
+
+  return 0
 }
 
 function renameFiles() {
@@ -128,10 +149,10 @@ function format_array {
   echo "${formatted%??}"
 }
 
-target="all"
+ui_targets="all"
 modules=("views" "compose")
 
-while getopts :n:p:o:t:hH opt; do
+while getopts :n:p:o:u:e:hH opt; do
   case ${opt} in
     n)
       app_name=${OPTARG}
@@ -142,8 +163,11 @@ while getopts :n:p:o:t:hH opt; do
     o)
       outputs=${OPTARG}
       ;;
-    t)
-      target=$(echo "${OPTARG}" | tr '[:upper:]' '[:lower:]')
+    u)
+      ui_targets=$(echo "${OPTARG}" | tr '[:upper:]' '[:lower:]')
+      ;;
+    e)
+      extra_modules=$(echo "${OPTARG}" | tr '[:upper:]' '[:lower:]')
       ;;
     h|H)
       print_usage
@@ -160,18 +184,17 @@ while getopts :n:p:o:t:hH opt; do
   esac
 done
 
-
 if [ -z "${app_name}" ] || [ -z "${pkg_name}" ]; then
     echo "[ERROR] required options is missing."
     exit_abnormal
 fi
 
-if [[ "${target}" != "all" && "${target}" != "views" && "${target}" != "compose" ]]; then
-    echo "[ERROR] Invalid target: [${target}]. Valid values are: [all, views, compose]."
+if [[ "${ui_targets}" != "all" && "${ui_targets}" != "views" && "${ui_targets}" != "compose" ]]; then
+    echo "[ERROR] Invalid UI target: [${target}]. Valid values are: [all, views, compose]."
     exit_abnormal
 fi
 
-case "${target}" in
+case "${ui_targets}" in
   "views")
     modules=("views")
     ;;
@@ -182,6 +205,19 @@ case "${target}" in
     modules=("views" "compose")
     ;;
 esac
+
+pkg_name_jni="${pkg_name//./_}"
+
+# Add extra modules to modules array
+if [ ! -z "${extra_modules}" ]; then
+  # Convert extra_modules string into an array
+  IFS=',' read -r -a extra_modules_array <<< "${extra_modules}"
+
+  # Append extra modules to the modules array
+  for module in "${extra_modules_array[@]}"; do
+    modules+=("${module}")
+  done
+fi
 
 source_dir="${PWD}/codebase"
 if [ ! -d "${source_dir}" ]; then
@@ -208,9 +244,10 @@ app_name_code=$(squeezeAndCapitalizeString ${app_name})
 echo
 echo "--------------- Code Generation for Android project ---------------"
 echo "Application name:    [${app_name}, code: ${app_name_code}]"
-echo "Package name:        [${pkg_name}]"
+echo "Package name:        [${pkg_name}, JNI: ${pkg_name_jni}]"
 echo "Output directory:    [${output_dir}]"
-echo "Targets:             [$(format_array ${modules[@]})]"
+echo "UI Targets:          [$(format_array ${ui_targets[@]})]"
+echo "Modules:             [$(format_array ${modules[@]})]"
 echo "-------------------------------------------------------------------"
 
 OLD_PWD=${PWD}
@@ -224,17 +261,33 @@ if [ ! -d "${output_dir}" ]; then
     echo "     [*]: Creating output directory ..."
     mkdir -p ${output_dir}
 fi 
-#cp -af ${source_dir}/* ${output_dir}/
+
+# Copy fundametal files 
 cp -af ${source_dir}/{.[!.],}* ${tmp_dir}/
+
+# Copy files for extra modules
+for module in "${modules[@]}"; do
+    template_dir="${source_dir}/templates/${module}"
+    if [ -d "${template_dir}" ]; then
+        echo "     [*]: Copying template for module: ${module} ..."
+        cp -af "${template_dir}/" "${tmp_dir}/"
+    fi
+done
+
+# Remove files for unused modules
 if [[ ! " ${modules[@]} " =~ " views " ]]; then
     rm -rf ${tmp_dir}/app
 fi
 if [[ ! " ${modules[@]} " =~ " compose " ]]; then
     rm -rf ${tmp_dir}/app-compose
 fi
+if [[ ! " ${modules[@]} " =~ " ndk " ]]; then
+    rm -rf ${tmp_dir}/core-native
+fi
 
 echo "[STEP 2]: Refactoring package structure ..."
 cd ${tmp_dir}
+
 if [[ " ${modules[@]} " =~ " views " ]]; then
   renamePackage "app/src/main/java"
   renamePackage "app/src/androidTest/java"
@@ -251,6 +304,14 @@ else
   removeModule "app-compose"
 fi
 
+if [[ " ${modules[@]} " =~ " ndk " ]]; then
+  renamePackage "core-native/src/main/java"
+  renamePackage "core-native/src/androidTest/java"
+  renamePackage "core-native/src/test/java"
+else
+  removeModule "core-native"
+fi
+
 renamePackage "core/src/main/java"
 renamePackage "core/src/androidTest/java"
 renamePackage "core/src/test/java"
@@ -259,6 +320,7 @@ renameFiles
 
 echo "[STEP 3]: Aligning source codes to the new structure ..."
 alignSourceCodes "${codebase_pkg}" "${pkg_name}"
+alignSourceCodes "${codebase_jni_pkg}" "${pkg_name_jni}"
 alignSourceCodes "${codebase_name_code}" "${app_name_code}"
 alignSourceCodes "${codebase_name}" "${app_name}"
 
