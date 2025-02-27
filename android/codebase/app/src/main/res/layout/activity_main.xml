@@ -24,6 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <TextView
+            android:id="@+id/hello_text"
             android:text="@string/hello"
             android:layout_centerInParent="true"
             android:layout_width="wrap_content"

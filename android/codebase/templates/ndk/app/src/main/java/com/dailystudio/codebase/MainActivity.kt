@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import com.dailystudio.codebase.core.R as coreR
+import com.dailystudio.codebase.core.nativelib.NativeLib
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         val helloText: TextView? = findViewById(R.id.hello_text)
         val resId = coreR.string.hello
 
-        helloText?.text = getString(resId)
+        helloText?.text = NativeLib().getString(this, resId)
     }
 
 }
