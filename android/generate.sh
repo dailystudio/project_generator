@@ -18,7 +18,9 @@ function print_usage {
   echo "    -p PACKAGE_NAME:                 the package name"
   echo "    -o OUTPUT_DIRECTORY:             the output directory of generated project"
   echo "    -u UI_TARGETS:                   the UI targets: all, views [Android Views + XML], compose [Jetpack Compose]. Default is \"all\""
-  echo "    -e EXTRA_MODULES:                include extra modules. Available module: ndk."
+  echo "    -e EXTRA_MODULES:                include extra modules. Available module: ndk"
+  echo "    -i ICON_FOREGROUND:              the SVG asset for launcher icon foreground"
+  echo "    -t THEME_COLOR:                  the primary color for the application theme"
   echo "    -h:                              display this message"
   echo
 }
@@ -152,7 +154,7 @@ function format_array {
 ui_targets="all"
 modules=("views" "compose")
 
-while getopts :n:p:o:u:e:hH opt; do
+while getopts :n:p:o:u:e:i:b:t:hH opt; do
   case ${opt} in
     n)
       app_name=${OPTARG}
@@ -168,6 +170,12 @@ while getopts :n:p:o:u:e:hH opt; do
       ;;
     e)
       extra_modules=$(echo "${OPTARG}" | tr '[:upper:]' '[:lower:]')
+      ;;
+    i)
+      icon_foreground=${OPTARG}
+      ;;
+    t)
+      theme_color=${OPTARG}
       ;;
     h|H)
       print_usage
@@ -248,6 +256,8 @@ echo "Package name:        [${pkg_name}, JNI: ${pkg_name_jni}]"
 echo "Output directory:    [${output_dir}]"
 echo "UI Targets:          [$(format_array ${ui_targets[@]})]"
 echo "Modules:             [$(format_array ${modules[@]})]"
+echo "Icon Foreground:     [${icon_foreground}]"
+echo "Theme Color:         [${theme_color}]"
 echo "-------------------------------------------------------------------"
 
 OLD_PWD=${PWD}
@@ -326,6 +336,37 @@ alignSourceCodes "${codebase_name}" "${app_name}"
 
 cd ${OLD_PWD}
 
-echo "[STEP 4]: Finalizing source codes into destination ..."
+echo "[STEP 4]: Customizing app theme and icon ..."
+if [ -n "${icon_foreground}" ]; then
+  RESOURCE_DIR="core/src/main/res/"
+  LAUNCHER_ICON_DIR=$(realpath "${tmp_dir}/${RESOURCE_DIR}")
+  cd "scripts/"
+
+  bg_param=""
+  if [ -n "${theme_color}" ]; then
+    ./create_launcher_icon.sh \
+        -b "${theme_color}" \
+        -c "#ffffff" \
+        -s 70 -q 100 \
+        -f "${icon_foreground}" \
+        -o "${LAUNCHER_ICON_DIR}"
+  else
+    ./create_launcher_icon.sh \
+        -c "#ffffff" \
+        -s 70 -q 100 \
+        -f "${icon_foreground}" \
+        -o "${LAUNCHER_ICON_DIR}"
+  fi
+
+  cd ${OLD_PWD}
+
+  if [ -n "${theme_color}" ]; then
+    COLOR_FILE="${tmp_dir}/core/src/main/res/values/colors.xml"
+    sed -i '' "s|\(<color name=\"primaryColor\">\)#.*\(<\/color>\)|\1${theme_color}\2|g" ${COLOR_FILE}
+  fi
+
+fi
+
+echo "[STEP 5]: Finalizing source codes into destination ..."
 cp -af ${tmp_dir}/{.[!.],}* ${output_dir}/
 rm -rf ${tmp_dir}
