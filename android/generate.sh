@@ -363,6 +363,25 @@ if [ -n "${icon_foreground}" ]; then
   if [ -n "${theme_color}" ]; then
     COLOR_FILE="${tmp_dir}/core/src/main/res/values/colors.xml"
     sed -i '' "s|\(<color name=\"primaryColor\">\)#.*\(<\/color>\)|\1${theme_color}\2|g" ${COLOR_FILE}
+
+    COMPOSE_THEME_FILE=$(find ${tmp_dir} -name Color.kt -print -quit)
+    if [ -n "$COMPOSE_THEME_FILE" ]; then
+      if [ ${#theme_color} -eq 4 ]; then
+        color_r="${theme_color:1:1}${theme_color:1:1}"
+        color_g="${theme_color:2:1}${theme_color:2:1}"
+        color_b="${theme_color:3:1}${theme_color:3:1}"
+        converted_color="0xff${color_r}${color_g}${color_b}"
+      else
+        converted_color="0xff${theme_color:1}"
+      fi
+      echo "Replacing theme color: [$COMPOSE_THEME_FILE] to ${converted_color}"
+
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s/val primaryColor = Color(.*)/val primaryColor = Color(${converted_color})/g" "$COMPOSE_THEME_FILE"
+      else
+        sed -i "s/val primaryColor = Color(.*)/val primaryColor = Color(${converted_color})/g" "$COMPOSE_THEME_FILE"
+      fi
+    fi
   fi
 
 fi

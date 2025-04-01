@@ -29,6 +29,19 @@ convert_vector_xml() {
   echo -e "$new_svg" | xmllint --format - > "$output_file"
 }
 
+replace_vector_colors() {
+  local input_file="$1"
+  local output_file="$2"
+  local new_color="$3"
+
+  local original_xml=$(cat "$input_file")
+
+  local replaced_xml=$(echo "$original_xml" | \
+    sed -E "s/android:(fillColor|strokeColor)=\"([^\"]*)\"/android:\1=\"${new_color}\"/g")
+
+  echo -e "$replaced_xml" | xmllint --format - > "$output_file"
+}
+
 function print_usage {
   echo "Usage:"
   echo
@@ -215,6 +228,10 @@ cd "vd-tool"
 ./vd-tool.sh -i "${foreground}" -o "${vector_asset}" -d 108
 cd ${OLD_PWD}
 convert_vector_xml "${vector_asset}" "${vector_asset}" 40
+if [ -n "${foreground_color}" ]; then
+  echo "Tinting foreground color: ${foreground_color}"
+  replace_vector_colors "${vector_asset}" "${vector_asset}"  "${foreground_color}"
+fi
 
 # Generating launcher icons for dpi
 for i in "${!dpi_types[@]}"; do
