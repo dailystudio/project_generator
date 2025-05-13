@@ -272,8 +272,9 @@ if [ ! -d "${output_dir}" ]; then
     mkdir -p ${output_dir}
 fi 
 
-# Copy fundametal files 
+# Copy fundamental files
 cp -af ${source_dir}/{.[!.],}* ${tmp_dir}/
+rm -rf ${tmp_dir}/templates
 
 # Copy files for extra modules
 for module in "${modules[@]}"; do
